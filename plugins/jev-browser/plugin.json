@@ -1,0 +1,106 @@
+{
+	"$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+	"name": "jev-browser",
+	"version": "0.1.0",
+	"description": "Runs one short task on a web page, in a separate Chrome or on a page of Farero's browser. Jev picks each click and each typed value from what is on the page. Uses your own TypeSafe key, and the page text goes to TypeSafe.",
+	"author": { "name": "Farero", "url": "https://farero.ai" },
+	"license": "MIT",
+	"keywords": ["browser", "forms", "testing"],
+	"extensions": {
+		"ai.farero": {
+			"version": "0.1",
+			"displayName": "Jev Browser",
+			"config": {
+				"model": {
+					"type": "string",
+					"description": "The Jev model that picks each step. jev-1.13.0 passed Farero's checks. jev-latest follows TypeSafe's newest model and can act differently.",
+					"enum": ["jev-1.13.0", "jev-latest"],
+					"default": "jev-1.13.0",
+					"maxLength": 32
+				},
+				"maxSteps": {
+					"type": "integer",
+					"description": "Most browser actions in one run.",
+					"minimum": 1,
+					"maximum": 60,
+					"default": 30
+				},
+				"browser": {
+					"type": "string",
+					"description": "Where a run happens. chrome-hidden uses a separate Chrome with no window. chrome-window opens that Chrome's window behind your current app; switch to Chrome to watch or use the page. farero uses a page of Farero's browser that the chat opens, so you can watch each step. It needs a connected Farero Desktop.",
+					"enum": ["chrome-hidden", "chrome-window", "farero"],
+					"default": "chrome-hidden",
+					"maxLength": 32
+				}
+			},
+			"credentials": {
+				"typesafeKey": {
+					"description": "Your TypeSafe API key. Farero stores it encrypted and gives it only to this plugin's run command.",
+					"required": true,
+					"maxBytes": 8192
+				}
+			},
+			"commands": {
+				"run": {
+					"description": "Runs one short task on a web page. With the browser setting chrome-hidden or chrome-window, the run uses a separate Chrome with a new profile. With farero, it acts on the Farero browser page that the chat opened and passes in device and tab. Returns the final URL, the page text and each action. The goal, the values and the page text go to TypeSafe on your key.",
+					"runtime": "node",
+					"entry": "./ai.farero/run.ts",
+					"workspace": "none",
+					"platforms": ["darwin"],
+					"inputs": {
+						"url": {
+							"type": "string",
+							"description": "The http or https page to start on, for example http://localhost:5173/signup.",
+							"required": true,
+							"maxLength": 2048
+						},
+						"goal": {
+							"type": "string",
+							"description": "Each step in order, with the button that submits, for example: Type Lisbon in the destination search and click Find stays. Then choose the Design category.",
+							"required": true,
+							"minLength": 1,
+							"maxLength": 2000
+						},
+						"values": {
+							"type": "string",
+							"description": "A JSON array of every exact text the task may type, for example [\"Lisbon\"]. The run types nothing else.",
+							"default": "[]",
+							"maxLength": 8192
+						},
+						"device": {
+							"type": "string",
+							"description": "Only when the browser setting is farero: the deviceId of the Farero Desktop that holds the page, from browser_devices or browser_open.",
+							"maxLength": 256
+						},
+						"tab": {
+							"type": "string",
+							"description": "Only when the browser setting is farero: the tabId of the page that browser_open returned.",
+							"maxLength": 256
+						}
+					},
+					"argv": [
+						"--url",
+						{ "input": "url" },
+						"--goal",
+						{ "input": "goal" },
+						"--values",
+						{ "input": "values" },
+						"--model",
+						{ "config": "model" },
+						"--max-steps",
+						{ "config": "maxSteps" },
+						"--browser",
+						{ "config": "browser" }
+					],
+					"stdin": { "credentials": ["typesafeKey"] },
+					"browser": { "device": "device", "tab": "tab" },
+					"limits": { "timeoutMs": 840000, "outputBytes": 262144 },
+					"dataDestinations": ["api.typesafe.ai"]
+				}
+			},
+			"skills": {
+				"jev-browser": { "requiresCommands": ["run"] }
+			}
+		}
+	}
+}

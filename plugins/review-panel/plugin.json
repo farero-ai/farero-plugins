@@ -1,0 +1,66 @@
+{
+	"$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+	"name": "review-panel",
+	"version": "0.1.1",
+	"description": "A small code review panel: a lead, a correctness reviewer and an independent skeptic, with a managed Workflow template that starts only when you choose it.",
+	"author": { "name": "Farero", "url": "https://farero.ai" },
+	"license": "MIT",
+	"keywords": ["review", "roles", "workflow"],
+	"extensions": {
+		"ai.farero": {
+			"version": "0.1",
+			"displayName": "Review panel",
+			"roles": {
+				"lead": {
+					"title": "Review lead",
+					"description": "Splits the review, briefs the reviewers, merges their findings and writes the final report.",
+					"instructionsFile": "./roles/lead.md",
+					"readOnly": false,
+					"delegation": true,
+					"concurrent": false,
+					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6-astra" }]
+				},
+				"reviewer": {
+					"title": "Correctness reviewer",
+					"description": "Reads the change and reports concrete defects with a failing input and the line that causes it.",
+					"instructionsFile": "./roles/reviewer.md",
+					"readOnly": true,
+					"models": [{ "model": "gpt-6-astra", "effort": "high" }, { "model": "fable", "effort": "high" }]
+				},
+				"skeptic": {
+					"title": "Independent skeptic",
+					"description": "Checks the reviewer's findings and looks for what the reviewer missed, with an independent model.",
+					"instructionsFile": "./roles/skeptic.md",
+					"readOnly": true,
+					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6.1-sol", "effort": "high" }],
+					"requires": { "independentFrom": ["reviewer"] }
+				},
+				"ui-check": {
+					"title": "Interface checker",
+					"description": "Opens the changed screens in the host browser and reports visible regressions.",
+					"instructionsFile": "./roles/ui-check.md",
+					"readOnly": true,
+					"models": [{ "model": "opus" }, { "model": "gpt-6.1-sol" }],
+					"requires": { "browser": true }
+				}
+			},
+			"workflows": {
+				"review-panel": {
+					"title": "Review panel",
+					"description": "The lead splits the change, the reviewer and the skeptic review it in parallel, and the lead reports ranked findings.",
+					"roles": ["lead", "reviewer", "skeptic"],
+					"objective": "Review the current branch against its base. Report verified findings ranked by severity, each with a failing input and the line that causes it."
+				},
+				"review-panel-ui": {
+					"title": "Review panel with interface check",
+					"description": "The review panel plus a browser check of the changed screens.",
+					"roles": ["lead", "reviewer", "skeptic", "ui-check"],
+					"objective": "Review the current branch against its base, including the screens it changes. Report verified findings ranked by severity."
+				}
+			},
+			"skills": {
+				"review-panel": { "delegation": true }
+			}
+		}
+	}
+}

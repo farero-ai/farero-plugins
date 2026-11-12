@@ -1,0 +1,29 @@
+{
+	"entries": [
+		{
+			"id": "jevgrep",
+			"version": "0.8.5-farero.2",
+			"sha256": "8e66c490631f6ecb86c21858f71241022ba6041aaaa0aefa5cb8746bd5a0aa01"
+		},
+		{
+			"id": "jev-browser",
+			"version": "0.1.0",
+			"sha256": "bd5c8281958eaac01cf0cc370f6aaade88e65dfd23793c745f259e9dbc4163ac"
+		},
+		{
+			"id": "review-panel",
+			"version": "0.1.1",
+			"sha256": "2b4524dfa7853255092b261ff95c0231215a4f1e934e20d19fc44e2d0218d08c"
+		},
+		{
+			"id": "pstack",
+			"version": "0.15.36-farero.1",
+			"sha256": "abbb2e9b876e350d852d0f5b76635aba193c6ca53842722039012bb3ac907b2d"
+		},
+		{
+			"id": "gstack",
+			"version": "1.99.0.0-farero.1",
+			"sha256": "ad892711ae9b2ec72781ff72355708f094b0fc22d2824d9f498099ab69667a88"
+		}
+	]
+}

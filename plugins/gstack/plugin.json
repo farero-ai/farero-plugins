@@ -1,0 +1,99 @@
+{
+	"$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+	"name": "gstack",
+	"version": "1.99.0.0-farero.1",
+	"description": "Garry Tan's gstack skills for Farero: the CEO, design, engineering and developer-experience plan reviews and the autoplan chain, pre-landing code review, ship, QA and design and documentation workflows, with roles and Workflow templates. Upstream text is unchanged; gstack's programs and browser daemon are left out.",
+	"author": { "name": "Farero", "url": "https://farero.ai" },
+	"homepage": "https://github.com/garrytan/gstack",
+	"repository": "https://github.com/garrytan/gstack",
+	"license": "MIT",
+	"keywords": ["gstack", "plan-review", "code-review", "qa", "ship", "workflow"],
+	"extensions": {
+		"ai.farero": {
+			"version": "0.1",
+			"displayName": "gstack",
+			"instructionsFile": "./ai.farero/instructions.md",
+			"roles": {
+				"lead": {
+					"title": "gstack lead",
+					"description": "Runs a gstack pipeline such as autoplan or review in the chat that owns it: briefs each reviewer, applies the decision rules and writes the final report.",
+					"instructionsFile": "./roles/lead.md",
+					"readOnly": false,
+					"delegation": true,
+					"concurrent": false,
+					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6.1-sol", "effort": "high" }]
+				},
+				"ceo-reviewer": {
+					"title": "CEO plan reviewer",
+					"description": "Reviews a plan's premise, scope and ambition with gstack's plan-ceo-review method and returns its findings and decisions.",
+					"instructionsFile": "./roles/ceo-reviewer.md",
+					"readOnly": true,
+					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6.1-sol", "effort": "high" }]
+				},
+				"design-reviewer": {
+					"title": "Design plan reviewer",
+					"description": "Reviews the user-interface parts of a plan with gstack's plan-design-review method: hierarchy, states, interaction and visual quality.",
+					"instructionsFile": "./roles/design-reviewer.md",
+					"readOnly": true,
+					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6.1-sol", "effort": "high" }]
+				},
+				"dx-reviewer": {
+					"title": "Developer-experience plan reviewer",
+					"description": "Reviews the developer-facing parts of a plan with gstack's plan-devex-review method: first run, APIs, errors, docs and upgrade paths.",
+					"instructionsFile": "./roles/dx-reviewer.md",
+					"readOnly": true,
+					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6.1-sol", "effort": "high" }]
+				},
+				"eng-reviewer": {
+					"title": "Engineering plan reviewer",
+					"description": "Reviews a plan's architecture, data flow, edge cases, failure modes and tests with gstack's plan-eng-review method.",
+					"instructionsFile": "./roles/eng-reviewer.md",
+					"readOnly": true,
+					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6-astra", "effort": "high" }]
+				},
+				"code-reviewer": {
+					"title": "Code reviewer",
+					"description": "Reviews a diff against its base with gstack's review checklist, one specialist pass or the adversarial pass, and reports findings with the line that causes each.",
+					"instructionsFile": "./roles/code-reviewer.md",
+					"readOnly": true,
+					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6-astra", "effort": "high" }]
+				},
+				"outside-voice": {
+					"title": "Outside voice",
+					"description": "Gives the independent second opinion that gstack gets from Codex: challenges a plan or a diff on a different model from the code and engineering reviewers.",
+					"instructionsFile": "./roles/outside-voice.md",
+					"readOnly": true,
+					"models": [{ "model": "gpt-6.1-sol", "effort": "high" }, { "model": "fable", "effort": "high" }],
+					"requires": { "independentFrom": ["code-reviewer", "eng-reviewer"] }
+				},
+				"qa": {
+					"title": "QA tester",
+					"description": "Tests a web app in Farero's browser with gstack's qa-only method and reports each bug with steps, evidence and severity. It changes no code.",
+					"instructionsFile": "./roles/qa.md",
+					"readOnly": true,
+					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6.1-sol", "effort": "high" }],
+					"requires": { "browser": true }
+				}
+			},
+			"workflows": {
+				"autoplan": {
+					"title": "Autoplan review",
+					"description": "The lead runs gstack's autoplan chain: CEO review, design and developer-experience reviews when they apply, engineering review last, an outside voice on another model, and one approval gate at the end.",
+					"roles": ["lead", "ceo-reviewer", "design-reviewer", "dx-reviewer", "eng-reviewer", "outside-voice"],
+					"objective": "Run gstack's /autoplan on the plan in <path to the plan file>. Follow the autoplan skill in order: CEO review, design review when the plan changes a user interface, developer-experience review when it changes a developer-facing surface, and engineering review last. Give each phase to its reviewer role and ask the outside voice for the independent second opinion. Decide intermediate questions by the six decision principles, and bring only the taste decisions and user challenges to the final approval gate."
+				},
+				"review": {
+					"title": "Pre-landing review",
+					"description": "The lead runs gstack's review on the current branch: the code reviewer runs the checklist, the specialist passes and the adversarial pass, and the outside voice adds the second adversarial pass that gstack runs through Codex.",
+					"roles": ["lead", "code-reviewer", "outside-voice"],
+					"objective": "Run gstack's /review on the current branch against its base. Write the Pre-Landing Review with verified findings ranked by severity, each with the input or state that triggers it, the wrong result and the line that causes it. Do not commit, push or open a pull request."
+				}
+			},
+			"skills": {
+				"autoplan": { "delegation": true },
+				"design-review": { "browser": true },
+				"devex-review": { "browser": true }
+			}
+		}
+	}
+}

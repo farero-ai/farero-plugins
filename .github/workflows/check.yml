@@ -1,0 +1,30 @@
+name: check
+# Packs the starter and every plugin folder that Farero packs as it is, with the signed Farero
+# release that .github/farero.json names. It starts no Farero service and needs no provider
+# account or key.
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Install the Farero release without its service
+        run: |
+          version=$(node -p 'require("./.github/farero.json").release')
+          base="https://updates.farero.ai/downloads/v${version}"
+          curl -fsSL --proto '=https' --tlsv1.2 "$base/manifest.json" -o "$RUNNER_TEMP/manifest.json"
+          curl -fsSL --proto '=https' --tlsv1.2 "$base/farero-${version}.tgz" -o "$RUNNER_TEMP/farero.tgz"
+          node .github/scripts/verify-farero-release.mjs "$RUNNER_TEMP/manifest.json" "$RUNNER_TEMP/farero.tgz" "$version"
+          npm install --global --ignore-scripts --omit=optional --no-audit --no-fund "$RUNNER_TEMP/farero.tgz"
+      - name: Pack the starter and the plugins
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node .github/scripts/check.mjs

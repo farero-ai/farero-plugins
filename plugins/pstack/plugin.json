@@ -1,0 +1,76 @@
+{
+	"$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+	"name": "pstack",
+	"version": "0.15.36-farero.1",
+	"description": "Lauren Tan's pstack agent workflows for Farero: poteto-mode and its playbooks, skills to design, review, verify and explain code, 24 engineering principles, and roles for its helpers.",
+	"author": { "name": "Farero", "url": "https://farero.ai" },
+	"homepage": "https://github.com/cursor/plugins/tree/main/pstack",
+	"repository": "https://github.com/cursor/plugins",
+	"license": "MIT",
+	"keywords": ["pstack", "poteto-mode", "workflow", "principles", "subagents", "review"],
+	"extensions": {
+		"ai.farero": {
+			"version": "0.1",
+			"displayName": "pstack",
+			"instructionsFile": "./ai.farero/instructions.md",
+			"roles": {
+				"lead": {
+					"title": "pstack lead",
+					"description": "Runs a pstack skill such as poteto-mode as the chat that owns the playbook, briefs the helpers, reviews their work and writes the report.",
+					"instructionsFile": "./roles/lead.md",
+					"readOnly": false,
+					"delegation": true,
+					"concurrent": false,
+					"models": [{ "model": "opus", "effort": "xhigh" }, { "model": "gpt-6.1-sol", "effort": "xhigh" }]
+				},
+				"poteto-agent": {
+					"title": "Poteto subagent",
+					"description": "Does one code-writing or helper task from a poteto-mode playbook step after it reads poteto-mode in full.",
+					"instructionsFile": "./roles/poteto-agent.md",
+					"readOnly": false,
+					"models": [{ "model": "gpt-6.1-sol", "effort": "high" }, { "model": "fable", "effort": "high" }]
+				},
+				"second-opinion": {
+					"title": "Second model family",
+					"description": "Runs the same brief as a poteto subagent on another model family, for adversaries, cross-judges, arena candidates and independent reviews.",
+					"instructionsFile": "./roles/second-opinion.md",
+					"readOnly": false,
+					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6-astra", "effort": "high" }],
+					"requires": { "independentFrom": ["poteto-agent"] }
+				},
+				"comment-sicko": {
+					"title": "Comment Sicko",
+					"description": "Deletes narration and workaround comments in the scoped files or diff and reports the symbols to reshape. It never writes application code.",
+					"instructionsFile": "./roles/comment-sicko.md",
+					"readOnly": false,
+					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6.1-sol", "effort": "high" }]
+				}
+			},
+			"workflows": {
+				"poteto-mode": {
+					"title": "Poteto mode",
+					"description": "The lead runs the matching poteto-mode playbook. Poteto subagents do the code-writing steps, a second model family checks the work, and Comment Sicko cleans the comments before review.",
+					"roles": ["lead", "poteto-agent", "second-opinion", "comment-sicko"],
+					"objective": "Run /poteto-mode on this task: <describe the task>. Match it to a playbook, follow the playbook's steps, and verify the result against the real artifact before you report."
+				},
+				"interrogate": {
+					"title": "Interrogate a change",
+					"description": "Adversaries on two model families try to break the change, and the lead keeps only the findings that a rerun proves.",
+					"roles": ["lead", "poteto-agent", "second-opinion"],
+					"objective": "Run /interrogate on the current branch against its base. Keep only the findings that a rerun proves, ranked by severity, each with the input that breaks the change and the line that causes it."
+				}
+			},
+			"skills": {
+				"arena": { "delegation": true },
+				"how": { "delegation": true },
+				"interrogate": { "delegation": true },
+				"maintain-verification-skill": { "delegation": true },
+				"no-comments": { "delegation": true },
+				"reflect": { "delegation": true },
+				"swarm": { "delegation": true },
+				"teach": { "delegation": true },
+				"why": { "delegation": true }
+			}
+		}
+	}
+}

@@ -1,0 +1,12 @@
+{
+	"release": "1.198.0",
+	"directory": {
+		"url": "https://updates.farero.ai/plugins/v1/index.json",
+		"keys": [
+			{
+				"id": "ed25519-4a37b67d179aded7",
+				"publicKey": "t7lKy95FxRQklm6/LthFZuNfdMz0E6frrvK4Ez7Jb1o="
+			}
+		]
+	}
+}

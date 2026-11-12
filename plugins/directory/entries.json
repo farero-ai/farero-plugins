@@ -1,0 +1,64 @@
+{
+	"entries": [
+		{
+			"id": "jevgrep",
+			"receipt": "jevgrep-0.8.5-farero.2.release.json",
+			"minAppVersion": "1.193.0",
+			"displayName": "Jevgrep",
+			"description": "Ask a question about a repository and get the relevant files and source excerpts. Uses your own Jev provider key.",
+			"checks": [
+				"closure-digest",
+				"upstream-integrity",
+				"registry-signatures",
+				"provenance-identity",
+				"licenses-retained",
+				"no-install-scripts",
+				"adapter-request-upload-time-bounds"
+			]
+		},
+		{
+			"id": "jev-browser",
+			"receipt": "jev-browser-0.1.0.pack.json",
+			"minAppVersion": "1.189.0",
+			"displayName": "Jev Browser",
+			"description": "For macOS: runs one short browser task in Chrome or Farero's browser. Jev picks each step; the goal, supplied values and page text go to TypeSafe on your key.",
+			"checks": ["closure-digest", "manifest-validation"]
+		},
+		{
+			"id": "review-panel",
+			"receipt": "review-panel-0.1.1.pack.json",
+			"minAppVersion": "1.179.0",
+			"displayName": "Review panel",
+			"description": "A small code review panel with author-defined roles and a Workflow template that starts only when you choose it.",
+			"checks": ["closure-digest", "manifest-validation"]
+		},
+		{
+			"id": "pstack",
+			"receipt": "pstack-0.15.36-farero.1.release.json",
+			"minAppVersion": "1.179.0",
+			"displayName": "pstack",
+			"description": "Lauren Tan's pstack agent workflows: poteto-mode and its playbooks, skills to design, review, verify and explain code, 24 engineering principles, and roles for its helpers.",
+			"checks": [
+				"closure-digest",
+				"pinned-upstream-commit",
+				"upstream-tree-digest",
+				"licenses-retained",
+				"manifest-validation"
+			]
+		},
+		{
+			"id": "gstack",
+			"receipt": "gstack-1.99.0.0-farero.1.release.json",
+			"minAppVersion": "1.179.0",
+			"displayName": "gstack",
+			"description": "Garry Tan's gstack skills for Farero: the CEO, design, engineering and developer-experience plan reviews and the autoplan chain, pre-landing code review, ship, QA and design and documentation workflows, with roles and Workflow templates. Upstream text is unchanged; gstack's programs and browser daemon are left out.",
+			"checks": [
+				"closure-digest",
+				"pinned-upstream-commit",
+				"upstream-tree-digest",
+				"licenses-retained",
+				"manifest-validation"
+			]
+		}
+	]
+}

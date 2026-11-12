@@ -1,0 +1,167 @@
+{
+	"$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+	"name": "jevgrep",
+	"version": "0.8.5-farero.2",
+	"description": "Ask a question about a repository and get the relevant files and source excerpts. Uses your own Jev provider key.",
+	"author": { "name": "Farero", "url": "https://farero.ai" },
+	"homepage": "https://github.com/dzhng/jevgrep",
+	"repository": "https://github.com/dzhng/jevgrep",
+	"license": "MIT",
+	"keywords": ["search", "retrieval", "code"],
+	"extensions": {
+		"ai.farero": {
+			"version": "0.1",
+			"displayName": "Jevgrep",
+			"config": {
+				"provider": {
+					"type": "string",
+					"description": "The Jev provider that receives source and bills your key.",
+					"enum": ["typesafe", "vercel", "openrouter", "opencode"],
+					"default": "typesafe",
+					"maxLength": 16
+				},
+				"maxRequests": {
+					"type": "integer",
+					"description": "Most provider requests one search can make.",
+					"minimum": 1,
+					"maximum": 1000,
+					"default": 300
+				},
+				"maxUploadMiB": {
+					"type": "integer",
+					"description": "Most request data, in MiB, one search can send to the provider.",
+					"minimum": 1,
+					"maximum": 64,
+					"default": 16
+				},
+				"timeLimitSeconds": {
+					"type": "integer",
+					"description": "Longest time one search can run before it stops and returns partial results.",
+					"minimum": 10,
+					"maximum": 600,
+					"default": 240
+				}
+			},
+			"credentials": {
+				"apiKey": {
+					"description": "API key for the chosen Jev provider. Farero stores it encrypted and gives it only to this plugin's search command.",
+					"required": true,
+					"maxBytes": 8192
+				}
+			},
+			"commands": {
+				"search": {
+					"description": "Ask how, why or where something works in the repository. Returns ranked files, locations and verbatim source excerpts. Sends eligible source to your provider and uses your key.",
+					"runtime": "node",
+					"entry": "./ai.farero/adapter.mjs",
+					"workspace": "required",
+					"readOnly": true,
+					"platforms": ["darwin", "win32", "linux"],
+					"inputs": {
+						"question": {
+							"type": "string",
+							"description": "A natural-language question about behavior, for example where a request is authorized.",
+							"required": true,
+							"minLength": 1,
+							"maxLength": 2000
+						},
+						"path": {
+							"type": "string",
+							"description": "Folder to search, relative to the worktree root.",
+							"default": ".",
+							"maxLength": 1024
+						},
+						"exclude": {
+							"type": "string",
+							"description": "One root-relative gitignore pattern to skip, for example src/generated/. Empty means none.",
+							"default": "",
+							"maxLength": 256
+						},
+						"maxSourceBytes": {
+							"type": "integer",
+							"description": "Most source excerpt bytes in the printed result. This limits the output only, not the data sent to the provider.",
+							"minimum": 1000,
+							"maximum": 200000,
+							"default": 60000
+						}
+					},
+					"argv": [
+						"search",
+						"--provider",
+						{ "config": "provider" },
+						"--max-requests",
+						{ "config": "maxRequests" },
+						"--max-upload-mib",
+						{ "config": "maxUploadMiB" },
+						"--time-limit",
+						{ "config": "timeLimitSeconds" },
+						"--max-source-bytes",
+						{ "input": "maxSourceBytes" },
+						"--path",
+						{ "input": "path" },
+						"--exclude",
+						{ "input": "exclude" },
+						"--question",
+						{ "input": "question" }
+					],
+					"stdin": { "credentials": ["apiKey"] },
+					"limits": { "timeoutMs": 630000, "outputBytes": 262144 },
+					"dataDestinations": ["api.typesafe.ai", "ai-gateway.vercel.sh", "openrouter.ai", "opencode.ai"]
+				},
+				"files": {
+					"description": "Count the files and bytes a search may read under a folder. Makes no provider request and needs no key.",
+					"runtime": "node",
+					"entry": "./ai.farero/adapter.mjs",
+					"workspace": "required",
+					"readOnly": true,
+					"platforms": ["darwin", "win32", "linux"],
+					"inputs": {
+						"path": {
+							"type": "string",
+							"description": "Folder to count, relative to the worktree root.",
+							"default": ".",
+							"maxLength": 1024
+						},
+						"exclude": {
+							"type": "string",
+							"description": "One root-relative gitignore pattern to skip. Use the same pattern for the search. Empty means none.",
+							"default": "",
+							"maxLength": 256
+						},
+						"list": {
+							"type": "boolean",
+							"description": "Also list every eligible relative path.",
+							"default": false
+						}
+					},
+					"argv": [
+						"files",
+						"--path",
+						{ "input": "path" },
+						"--exclude",
+						{ "input": "exclude" },
+						"--list",
+						{ "input": "list" }
+					],
+					"limits": { "timeoutMs": 120000, "outputBytes": 262144 },
+					"dataDestinations": []
+				}
+			},
+			"skills": {
+				"jevgrep-search": { "requiresCommands": ["search", "files"] }
+			},
+			"roles": {
+				"explore": {
+					"title": "Explorer",
+					"description": "Read-only code research that starts with a Jevgrep search. Use for how, why or where behavior works across a repository. Reports files, locations and evidence.",
+					"instructionsFile": "./roles/explore.md",
+					"readOnly": true,
+					"delegation": false,
+					"concurrent": true,
+					"models": [{ "model": "gpt-6.1-terra", "effort": "medium" }, { "model": "sonnet", "effort": "medium" }],
+					"requires": { "commands": ["search", "files"] }
+				}
+			}
+		}
+	}
+}
