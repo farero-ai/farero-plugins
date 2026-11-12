@@ -1,73 +1,29 @@
 import { execFileSync } from 'node:child_process'
-import { createHash, createPublicKey, verify } from 'node:crypto'
 import { existsSync, mkdtempSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
+import { main, pinned, Refusal, run, sha256, signedIndex } from './directory.mjs'
 
 /**
  * Gives each plugin version in Farero's signed plugin directory a release in this repository:
  *
  *   node .github/scripts/releases.mjs [--dry-run]
  *
- * It reads the index at the URL in .github/farero.json, and refuses it unless a key in that file
- * signed it and it has not expired. For each listed version that has no release, it takes the
- * newest commit whose plugins/<id>/plugin.json has that version. It downloads the archive that
- * the index pins, checks its sha256, and checks that the archive holds every file of that folder
- * at that commit, byte for byte, except release/. Then it creates the release <id>-v<version> at
- * that commit with the archive and the signed index. It never changes a published release. A
- * draft that an interrupted run left is deleted and made again. --dry-run creates nothing.
+ * For each listed version that has no release, it takes the commit that its tag names, or else
+ * the newest commit whose plugins/<id>/plugin.json has that version. It downloads the archive
+ * that the index pins, checks its sha256, and checks that the archive holds every file of that
+ * folder at that commit, byte for byte, except release/. Then it creates the release
+ * <id>-v<version> at that commit with the archive and the signed index. It never changes a
+ * published release. A draft that an interrupted run left is deleted and made again. --dry-run
+ * creates nothing.
  *
- * Needs git with the full history, gh with GH_TOKEN (contents: write) and tar. Node standard
- * library only.
+ * Needs git with the full history, gh with GH_TOKEN (contents: write) and tar.
  */
 
-const ED25519_SPKI_PREFIX = Buffer.from('302a300506032b6570032100', 'hex')
 const dryRun = process.argv.includes('--dry-run')
-const config = JSON.parse(readFileSync(path.join('.github', 'farero.json'), 'utf8'))
 const repository =
 	process.env.GITHUB_REPOSITORY ??
 	run('gh', ['repo', 'view', '--json', 'nameWithOwner', '--jq', '.nameWithOwner']).trim()
-
-function run(command, args, options = {}) {
-	return execFileSync(command, args, { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, ...options })
-}
-
-function sha256(bytes) {
-	return createHash('sha256').update(bytes).digest('hex')
-}
-
-class Refusal extends Error {}
-
-function signedBy(payload, signature) {
-	const key = config.directory.keys.find(candidate => candidate.id === signature?.keyId)
-	if (!key || typeof signature.signature !== 'string') return false
-	try {
-		const publicKey = createPublicKey({
-			key: Buffer.concat([ED25519_SPKI_PREFIX, Buffer.from(key.publicKey, 'base64')]),
-			format: 'der',
-			type: 'spki'
-		})
-		return verify(null, payload, publicKey, Buffer.from(signature.signature, 'base64'))
-	} catch {
-		return false
-	}
-}
-
-async function signedIndex() {
-	const response = await fetch(config.directory.url, { redirect: 'error', signal: AbortSignal.timeout(60_000) })
-	if (!response.ok) throw new Refusal(`${config.directory.url} returned HTTP ${response.status}`)
-	const text = await response.text()
-	const document = JSON.parse(text)
-	if (typeof document?.payload !== 'string' || !Array.isArray(document.signatures))
-		throw new Refusal('the directory index is not a signed document')
-	const payload = Buffer.from(document.payload, 'base64')
-	if (!document.signatures.some(signature => signedBy(payload, signature)))
-		throw new Refusal('no key in .github/farero.json signed the directory index')
-	const index = JSON.parse(payload.toString('utf8'))
-	if (index.version !== 1 || !Array.isArray(index.entries)) throw new Refusal('the directory index is not version 1')
-	if (!(index.expiresAt > Date.now())) throw new Refusal('the directory index has expired')
-	return { text, index }
-}
 
 /** Release tags, and the draft releases that an interrupted run left, by tag. */
 function releases() {
@@ -194,12 +150,7 @@ async function release(entry, text, sequence, existing) {
 	const work = mkdtempSync(path.join(os.tmpdir(), `${tag}-`))
 	const archiveName = path.posix.basename(new URL(entry.source.url).pathname)
 	const archive = path.join(work, archiveName)
-	const response = await fetch(entry.source.url, { signal: AbortSignal.timeout(600_000) })
-	if (!response.ok) throw new Refusal(`${entry.source.url} returned HTTP ${response.status}`)
-	const bytes = Buffer.from(await response.arrayBuffer())
-	if (sha256(bytes) !== entry.source.sha256)
-		throw new Refusal(`${entry.source.url} has sha256 ${sha256(bytes)}, but the index pins ${entry.source.sha256}`)
-	writeFileSync(archive, bytes)
+	writeFileSync(archive, await pinned(entry.source.url, entry.source.sha256))
 	const counts = checkArchive(entry, commit, archive)
 	const kind = recipe(commit, entry.id)
 	const notesFile = path.join(work, 'notes.md')
@@ -248,7 +199,7 @@ async function release(entry, text, sequence, existing) {
 	return { ...summary, state: 'created', immutable: published.immutable === true }
 }
 
-try {
+await main(async () => {
 	const { text, index } = await signedIndex()
 	const existing = releases()
 	const results = []
@@ -269,8 +220,4 @@ try {
 		`${JSON.stringify({ ok: !failures.length, dryRun, sequence: index.sequence, results, failures })}\n`
 	)
 	if (failures.length) process.exit(1)
-} catch (error) {
-	if (!(error instanceof Refusal)) throw error
-	process.stderr.write(`releases: ${error.message}\n`)
-	process.exit(1)
-}
+})

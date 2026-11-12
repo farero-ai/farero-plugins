@@ -1,0 +1,35 @@
+name: sync
+# Makes main show the plugin source that Farero's signed plugin directory pins, then gives each
+# listed version an immutable release with the archive that the index pins. GITHUB_TOKEN cannot
+# push workflow files, so a maintainer pushes a change to .github/workflows/ by hand. GitHub
+# stops the schedule after 60 days without a push. Each Farero promotion changes
+# .github/farero.json, so the sync pushes at least once per promotion.
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  push:
+    branches: [main]
+  workflow_dispatch:
+concurrency:
+  group: sync
+  cancel-in-progress: false
+permissions:
+  contents: write
+jobs:
+  sync:
+    if: github.repository == 'farero-ai/farero-plugins'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Show the signed plugin source on main
+        run: node .github/scripts/sync.mjs
+      - name: Release each listed version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node .github/scripts/releases.mjs

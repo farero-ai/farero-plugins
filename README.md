@@ -10,13 +10,13 @@ This repository holds the source of the plugins in [Farero](https://farero.ai)'s
 | [pstack](plugins/pstack/) | Lauren Tan's pstack agent workflows: poteto-mode and its playbooks, skills to design, review, verify and explain code, 24 engineering principles, and roles for its helpers. | [Upstream](#how-each-archive-is-built) |
 | [gstack](plugins/gstack/) | Garry Tan's gstack skills for Farero: the CEO, design, engineering and developer-experience plan reviews and the autoplan chain, pre-landing code review, ship, QA and design and documentation workflows, with roles and Workflow templates. Upstream text is unchanged; gstack's programs and browser daemon are left out. | [Upstream](#how-each-archive-is-built) |
 
-Each plugin's README tells what the plugin does, what data it sends where, and which settings it has. [CREDITS.md](CREDITS.md) names the projects that these plugins adapt or bundle. `plugins/directory/entries.json` is the curated list that the directory shows, and `plugins/directory/listed.json` shows the version that it lists now.
+Each plugin's README tells what the plugin does, what data it sends where, and which settings it has. [CREDITS.md](CREDITS.md) names the projects that these plugins adapt or bundle. `plugins/directory/entries.json` is the curated list that the directory shows.
 
 ## Releases
 
 Each plugin version in the directory has a release here, tagged `<plugin>-v<version>`, for example `jevgrep-v0.8.5-farero.2`. The release holds the archive that Farero installs, byte for byte the file that the directory serves. It also holds `directory-index.json`, the signed directory index that lists the archive.
 
-The tag holds the source of that version. The archive contains every file of `plugins/<plugin>/` at the tag, except `release/`. The release workflow checks this before it publishes a release. Releases here are immutable: after a release is published, its tag and its files stay as they are, and GitHub signs an attestation for them.
+The tag holds the source of that version. The archive contains every file of `plugins/<plugin>/` at the tag, except `release/`. The sync workflow checks this before it publishes a release. Releases here are immutable: after a release is published, its tag and its files stay as they are, and GitHub signs an attestation for them.
 
 To check an archive that you downloaded:
 
@@ -52,7 +52,9 @@ The [plugin format reference](https://farero.ai/docs/plugin-format/) describes t
 
 ## Changes and issues
 
-Farero develops these plugins in its own repository and copies their source here each time it publishes the directory. To report a problem or propose a change, open an issue or a pull request. A maintainer makes an accepted change in Farero's repository, and the next publication brings it here.
+Farero develops these plugins in its own repository. Each time Farero publishes the directory, the signed index also pins an archive of this repository's files. The sync workflow here checks the signature and the archive's sha256, and then makes `main` match the archive. So `main` shows only source that Farero's directory key signed.
+
+To report a problem or propose a change, open an issue or a pull request. A maintainer makes an accepted change in Farero's repository, and the next publication brings it here.
 
 ## License
 
