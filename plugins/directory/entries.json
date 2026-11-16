@@ -22,7 +22,7 @@
 		},
 		{
 			"id": "jev-browser",
-			"receipt": "jev-browser-0.1.0.pack.json",
+			"receipt": "jev-browser-0.1.1.pack.json",
 			"minAppVersion": "1.189.0",
 			"displayName": "Jev Browser",
 			"description": "For macOS: runs one short browser task in Chrome or Farero's browser. Jev picks each step; the goal, supplied values and page text go to TypeSafe on your key.",

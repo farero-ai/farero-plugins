@@ -43,7 +43,8 @@ With the `farero` setting, no Chrome starts. The run works on one page of Farero
    shows in the chat's browser receipts.
 3. The run loads the URL in the page. Then it reads the page with `browser_snapshot`, asks Jev for
    the next step, reads the page again, and acts only if the page did not change since the first
-   read.
+   read. While the page has no content yet, the run reads it again. After 15 seconds with no
+   content, the run stops as `failed`.
 4. It repeats until Jev chooses done or blocked, a text is missing or a limit stops the run. The
    page stays open, and the result comes from the last read of the page.
 

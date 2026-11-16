@@ -40,6 +40,7 @@ const STEP_LIMIT = 60
 const REQUEST_TIMEOUT_MS = 25_000
 const CDP_TIMEOUT_MS = 15_000
 const LAUNCH_TIMEOUT_MS = 20_000
+/** How long a page may take to load: Chrome's document, or the content of a Farero page. */
 const READY_TIMEOUT_MS = 15_000
 /** Leaves time to print the result and clean up inside the command's 14-minute limit. */
 const TIME_LIMIT_MS = 12 * 60_000
@@ -122,6 +123,8 @@ interface ChromeState extends PageState {
 /** One Farero browser_snapshot. The result text holds more of the page than a request does. */
 interface FareroState extends PageState {
 	resultText: string
+	/** The page tree was empty: the page has no content yet. */
+	empty: boolean
 }
 
 /**
@@ -1068,7 +1071,10 @@ function parseKey(key: string): { role: string; name: string; attrs: Record<stri
 	return { role, name, attrs }
 }
 
-/** browser_snapshot's text: the page URL and title, then the aria tree as YAML. */
+/**
+ * browser_snapshot's text: the page URL and title, then the aria tree as YAML. A page that has no
+ * content yet gives a tree with one empty line.
+ */
 function parseSnapshot(source: string): { url: string; title: string; nodes: SnapNode[] } {
 	const url = /^- Page URL: (.*)$/m.exec(source)?.[1] ?? ''
 	const title = /^- Page Title: (.*)$/m.exec(source)?.[1] ?? ''
@@ -1077,6 +1083,7 @@ function parseSnapshot(source: string): { url: string; title: string; nodes: Sna
 	const root: SnapNode = { role: 'fragment', name: '', ref: null, attrs: {}, text: null, props: {}, children: [] }
 	const stack: { depth: number; node: SnapNode }[] = [{ depth: -1, node: root }]
 	for (const line of block[1].split('\n')) {
+		if (!line.trim()) continue
 		const match = /^( *)- (.*)$/.exec(line)
 		if (!match) throw new BrowserError('The Farero page snapshot has a line in an unexpected form.')
 		const depth = match[1].length / 2
@@ -1270,7 +1277,8 @@ function fareroState(snapshot: string): FareroState {
 		text,
 		actions: observedActions(controls),
 		resultText: all.slice(0, MAX_TEXT_OUTPUT),
-		fingerprint: createHash('sha256').update(canonical({ url, text, controls })).digest('hex')
+		fingerprint: createHash('sha256').update(canonical({ url, text, controls })).digest('hex'),
+		empty: nodes.length === 0
 	}
 }
 
@@ -1350,9 +1358,19 @@ class FareroPage implements PageLayer<FareroState> {
 		return page
 	}
 
+	/** A page that loads or navigates has no content for a moment. */
 	async observe(): Promise<FareroState> {
-		const page = this.next ?? (await this.read())
+		let page = this.next ?? (await this.read())
 		this.next = null
+		if (!page.empty) return page
+		const started = performance.now()
+		for (let delay = 250; page.empty; delay = Math.min(delay * 2, FARERO_WAIT_MS)) {
+			if (elapsed(started) >= READY_TIMEOUT_MS)
+				throw new BrowserError(`The Farero page showed no content within ${READY_TIMEOUT_MS / 1000} seconds.`)
+			await sleep(delay)
+			page = await this.read()
+		}
+		log(`Page content after ${elapsed(started)} ms`)
 		return page
 	}
 

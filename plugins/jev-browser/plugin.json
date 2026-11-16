@@ -1,7 +1,7 @@
 {
 	"$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
 	"name": "jev-browser",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Runs one short task on a web page, in a separate Chrome or on a page of Farero's browser. Jev picks each click and each typed value from what is on the page. Uses your own TypeSafe key, and the page text goes to TypeSafe.",
 	"author": { "name": "Farero", "url": "https://farero.ai" },
 	"license": "MIT",
