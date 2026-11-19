@@ -1,7 +1,7 @@
 {
 	"$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
 	"name": "pstack",
-	"version": "0.15.36-farero.1",
+	"version": "0.15.36-farero.2",
 	"description": "Lauren Tan's pstack agent workflows for Farero: poteto-mode and its playbooks, skills to design, review, verify and explain code, 24 engineering principles, and roles for its helpers.",
 	"author": { "name": "Farero", "url": "https://farero.ai" },
 	"homepage": "https://github.com/cursor/plugins/tree/main/pstack",
@@ -14,6 +14,20 @@
 			"displayName": "pstack",
 			"instructionsFile": "./ai.farero/instructions.md",
 			"roles": {
+				"reviewer": {
+					"title": "Interrogate reviewers",
+					"description": "Reviews the same change independently, once per enabled model maker.",
+					"instructions": "Review the scoped change read-only. Report findings with evidence the lead can reproduce, or say you found none.",
+					"readOnly": true,
+					"fanout": "per-vendor"
+				},
+				"arena-runner": {
+					"title": "Arena runners",
+					"description": "Produces one candidate solution per enabled model maker.",
+					"instructions": "Produce one independent candidate for the arena brief. Work only in the scope and location assigned to you.",
+					"readOnly": false,
+					"fanout": "per-vendor"
+				},
 				"lead": {
 					"title": "pstack lead",
 					"description": "Runs a pstack skill such as poteto-mode as the chat that owns the playbook, briefs the helpers, reviews their work and writes the report.",

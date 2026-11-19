@@ -42,8 +42,8 @@
 		},
 		{
 			"id": "pstack",
-			"receipt": "pstack-0.15.36-farero.1.release.json",
-			"minAppVersion": "1.179.0",
+			"receipt": "pstack-0.15.36-farero.2.release.json",
+			"minAppVersion": "1.221.0",
 			"displayName": "pstack",
 			"description": "Lauren Tan's pstack agent workflows: poteto-mode and its playbooks, skills to design, review, verify and explain code, 24 engineering principles, and roles for its helpers.",
 			"upstream": {

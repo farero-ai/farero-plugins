@@ -73,8 +73,10 @@ Principles: `poteto-mode` names when each principle applies. Each one is a short
 - `pstack/second-opinion` runs the same kind of brief on another model family. Farero keeps its model apart from the poteto subagent's models. Use it where a skill asks for a second model.
 - `pstack/comment-sicko` deletes narration and workaround comments and flags the code to reshape. Its upstream text is the file `agents/comment-sicko.md` in this skill's folder.
 - `pstack/lead` leads the Workflow templates. It starts helpers, so `delegate_task` cannot use it.
+- `pstack/reviewer` runs one independent review per enabled model maker in `/interrogate`. The result names the models that reviewed. With one maker it also names makers that would add coverage.
+- `pstack/arena-runner` runs one candidate per maker in `/arena`. One judge compares the candidates.
 
-The person chooses the models for each role in Farero's role settings.
+Auto picks each panel member from the models enabled in Settings → Models. Opus counts as Anthropic whether Claude Code or Cursor runs it. To narrow a panel for this installation, change its role in the plugin's settings.
 
 ## Workflow templates
 

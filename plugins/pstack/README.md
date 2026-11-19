@@ -8,7 +8,8 @@ pstack is Lauren Tan's set of agent workflows: poteto-mode and its playbooks, sk
 - The two upstream agent texts, `poteto-agent.md` and `comment-sicko.md`, in `skills/pstack-on-farero/agents/`.
 - `skills/pstack-on-farero/`: the entry skill. It lists every skill, the roles, the Workflow templates and the limits.
 - `ai.farero/instructions.md`: the agent instructions that map pstack's Cursor steps to Farero. Farero gives them to the agent with each skill. The upstream text stays unchanged.
-- Four roles:
+- Package roles:
+  - `pstack/reviewer` and `pstack/arena-runner` choose one enabled model per maker with Auto. The arena judge runs once.
   - `pstack/poteto-agent` does one code-writing or helper task.
   - `pstack/second-opinion` runs a brief on another model family.
   - `pstack/comment-sicko` deletes narration and workaround comments.
