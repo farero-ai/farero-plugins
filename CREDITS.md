@@ -12,11 +12,15 @@ The Jevgrep plugin runs the unmodified npm release of [jevgrep](https://github.c
 
 ## pstack
 
-The pstack plugin contains [pstack](https://github.com/cursor/plugins/tree/main/pstack) by Lauren Tan, MIT licensed, Copyright (c) 2026 Lauren Tan. Its recipe copies pstack's skills and agent texts byte for byte from the commit that [`plugins/pstack/release/upstream.json`](plugins/pstack/release/upstream.json) pins. Each release archive keeps the license text in `licenses/`, and its `THIRD_PARTY_NOTICES.md` lists every upstream file.
+Farero’s pstack integration follows [pstack](https://github.com/cursor/plugins/tree/main/pstack) by Lauren Tan, MIT licensed, Copyright (c) 2026 Lauren Tan. Farero caches the upstream license with the skills it downloads.
 
 ## gstack
 
-The gstack plugin contains [gstack](https://github.com/garrytan/gstack) by Garry Tan, MIT licensed, Copyright (c) 2026 Garry Tan. Its recipe copies gstack's skills byte for byte from the commit that [`plugins/gstack/release/upstream.json`](plugins/gstack/release/upstream.json) pins. gstack includes material from other projects under their own licenses. Each release archive keeps gstack's license, its `NOTICE.md` and those licenses in `licenses/`.
+Farero’s gstack integration follows releases of [gstack](https://github.com/garrytan/gstack) by Garry Tan and contributors, MIT licensed, Copyright (c) 2026 Garry Tan. Farero caches gstack’s license and third-party notices with the skills it downloads.
+
+## ponytail
+
+The ponytail plugin contains [Ponytail](https://github.com/DietrichGebert/ponytail) by Dietrich Gebert, MIT licensed, Copyright (c) 2026 DietrichGebert. Its recipe copies the native Claude Code, Codex and OpenCode files byte for byte from the commit that [`plugins/ponytail/release/upstream.json`](plugins/ponytail/release/upstream.json) pins. Each release archive keeps the license text in `licenses/`, and its `THIRD_PARTY_NOTICES.md` lists every upstream file.
 
 ## Review panel and the starter
 

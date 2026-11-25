@@ -97,6 +97,6 @@ These upstream skills are not in the package:
 
 Other limits:
 
-- The scripts in `poteto-mode/scripts/` and `show-me-your-work/scripts/` are not run. The steps that run them say so, or you do them by hand.
+- Follow the Farero instructions when an upstream step calls a pstack script.
 - Skills from other Cursor plugins, such as `deslop`, `control-ui` and `control-cli` from `cursor-team-kit`, are not installed.
 - `create-formal-verification-skill` sends TLA+ results to `statechart`, which is left out. Read the TLC output directly.

@@ -32,6 +32,7 @@
  * - Upstream paths are relative to the repository root. `skillsRoot` is `.` for the root itself.
  * - `skills` are folders under `skillsRoot`, copied whole to `skills/<name>/`. Every other folder
  *   under `skillsRoot` must be in `excluded` with the reason it is left out.
+ *   Set `skillsDestination` when a provider loads those folders under its own plugin root.
  * - `omit` leaves files or folders inside a selected skill out of the copy, each with a reason.
  * - `files` copies other upstream files to a path in the package. `licenseFiles` go to
  *   `licenses/<path>`.
@@ -58,8 +59,6 @@ import { createHash, randomUUID } from 'node:crypto'
 import {
 	chmodSync,
 	copyFileSync,
-	createReadStream,
-	createWriteStream,
 	existsSync,
 	mkdirSync,
 	mkdtempSync,
@@ -68,21 +67,17 @@ import {
 	renameSync,
 	rmSync,
 	statSync,
-	type WriteStream,
 	writeFileSync
 } from 'node:fs'
-import { mkdir, open } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
-import { pipeline } from 'node:stream/promises'
 import { parseArgs } from 'node:util'
-import { createGunzip } from 'node:zlib'
 import { PLUGIN_NAME_PATTERN, type PluginFileEntry } from '@farero/core/plugin'
-import { Parser, type ReadEntry } from 'tar'
 import { pinnedHttpsDownload } from '../../src/host/plugins/fetch'
 import { inspectPluginDirectory, pluginClosureDigest } from '../../src/host/plugins/inspect'
 import { packPluginDirectory } from '../../src/host/plugins/pack'
-import { PLUGIN_IGNORED_NAMES, PLUGIN_LIMITS, PluginPathSet, pluginPathProblem } from '../../src/host/plugins/paths'
+import { PLUGIN_IGNORED_NAMES, PluginPathSet, pluginPathProblem } from '../../src/host/plugins/paths'
+import { extractUpstreamArchive } from '../../src/host/plugins/upstream-archive'
 
 interface UpstreamFile {
 	from: string
@@ -96,6 +91,7 @@ interface Pins {
 	license: string
 	licenseFiles: string[]
 	skillsRoot: string
+	skillsDestination: string
 	skills: string[]
 	excluded: Record<string, string>
 	omit: Record<string, string>
@@ -106,9 +102,6 @@ interface Pins {
 const root = path.resolve(import.meta.dirname, '../..')
 const RELEASE_FOLDER = 'release'
 const GENERATED = ['THIRD_PARTY_NOTICES.md', 'PROVENANCE.json']
-const FILE_TYPES = new Set(['File', 'OldFile', 'ContiguousFile'])
-/** Headers, padding and the end-of-archive record on top of the admitted file bytes. */
-const TAR_OVERHEAD_BYTES = 64 * 1024 * 1024
 const PIN_FIELDS = new Set([
 	'repository',
 	'commit',
@@ -116,6 +109,7 @@ const PIN_FIELDS = new Set([
 	'license',
 	'licenseFiles',
 	'skillsRoot',
+	'skillsDestination',
 	'skills',
 	'excluded',
 	'omit',
@@ -220,6 +214,8 @@ function readPins(file: string): Pins {
 		license: text('license'),
 		licenseFiles: licenseFiles.length ? licenseFiles : fail(`${where}: licenseFiles must name the upstream license`),
 		skillsRoot: raw.skillsRoot === '.' ? '.' : upstreamPath(raw.skillsRoot, 'skillsRoot'),
+		skillsDestination:
+			raw.skillsDestination === undefined ? 'skills' : upstreamPath(raw.skillsDestination, 'skillsDestination'),
 		skills: names('skills'),
 		excluded: excluded as Record<string, string>,
 		omit: omit as Record<string, string>,
@@ -253,117 +249,6 @@ async function upstreamArchive(pins: Pins): Promise<string> {
 	} finally {
 		rmSync(partial, { force: true })
 	}
-}
-
-interface Extracted {
-	/** The selected files, at their upstream paths. */
-	upstream: string
-	/** Every upstream path in the archive with its tar entry type. */
-	entries: Map<string, string>
-	executables: Set<string>
-}
-
-/**
- * Extracts the selected regular files of one repository folder in a gzip or plain tar. The
- * host's archive limits bound the whole stream, and its path and size rules apply to the
- * selection. A link or other entry refuses inside the selection. Nothing else is written.
- */
-async function extract(file: string, destination: string, selected: (name: string) => boolean): Promise<Extracted> {
-	const entries = new Map<string, string>()
-	const executables = new Set<string>()
-	const paths = new PluginPathSet()
-	const writes: Promise<void>[] = []
-	const outputs = new Set<WriteStream>()
-	const parser = new Parser({ strict: true, brotli: false, zstd: false })
-	let top: string | undefined
-	let count = 0
-	let total = 0
-	let failure: Error | undefined
-	const refuse = (message: string) => {
-		failure ??= new Error(`assemble-upstream: the upstream archive is refused: ${message}`)
-		parser.abort(failure)
-	}
-	const done = new Promise<void>((resolve, reject) => {
-		parser.on('abort', (error: Error) => reject(failure ?? error))
-		parser.on('error', (error: Error) => refuse(error.message))
-		parser.on('end', () => resolve())
-	})
-	const write = async (entry: ReadEntry, target: string): Promise<void> => {
-		await mkdir(path.dirname(target), { recursive: true })
-		if (failure) return
-		const output = createWriteStream(target, { flags: 'wx' })
-		outputs.add(output)
-		try {
-			await pipeline(entry, output)
-		} finally {
-			outputs.delete(output)
-		}
-	}
-	/** Why the entry refuses the archive, or null when it is skipped or admitted. */
-	const admission = (entry: ReadEntry, head: string, name: string): string | null => {
-		if (++count > PLUGIN_LIMITS.files * 2) return 'it has too many entries'
-		if (top !== undefined && head !== top) return 'it holds more than one repository folder'
-		top = head
-		if (!name || entry.type === 'Directory' || !selected(name)) return null
-		if (!FILE_TYPES.has(entry.type)) return `${name}: ${entry.type} entries are not admitted`
-		const problem = paths.add(name)
-		if (problem) return `${name}: ${problem}`
-		if (paths.size > PLUGIN_LIMITS.files) return 'the selection has too many files'
-		if (entry.size > PLUGIN_LIMITS.fileBytes) return `${name}: the file is larger than 64 MiB`
-		total += entry.size
-		if (total > PLUGIN_LIMITS.bytes) return 'the selection is larger than 256 MiB'
-		return null
-	}
-	parser.on('entry', (entry: ReadEntry) => {
-		if (failure) return entry.resume()
-		const [head, ...rest] = entry.path.replace(/\/+$/, '').split('/')
-		const name = rest.join('/')
-		if (name) entries.set(name, entry.type)
-		const refusal = admission(entry, head, name)
-		if (refusal) {
-			entry.resume()
-			return refuse(refusal)
-		}
-		if (!name || entry.type === 'Directory' || !selected(name)) return entry.resume()
-		if (((entry.mode ?? 0) & 0o100) !== 0) executables.add(name)
-		writes.push(write(entry, path.join(destination, ...name.split('/'))).catch((error: Error) => refuse(error.message)))
-	})
-	const magic = Buffer.alloc(2)
-	const handle = await open(file, 'r')
-	try {
-		await handle.read(magic, 0, 2, 0)
-	} finally {
-		await handle.close()
-	}
-	const input = createReadStream(file)
-	const tar = magic[0] === 0x1f && magic[1] === 0x8b ? input.pipe(createGunzip()) : input
-	let compressed = 0
-	let expanded = 0
-	input.on('data', chunk => {
-		compressed += chunk.length
-	})
-	tar.on('data', (chunk: Buffer) => {
-		if (failure) return
-		if (expanded === 0 && ((chunk[0] === 0x1f && chunk[1] === 0x8b) || chunk.readUInt32LE(0) === 0xfd2fb528))
-			return refuse('only plain tar or a single gzip layer is admitted')
-		expanded += chunk.length
-		if (expanded > PLUGIN_LIMITS.bytes + TAR_OVERHEAD_BYTES) refuse('it expands beyond 256 MiB')
-		else if (expanded > PLUGIN_LIMITS.ratioFloor && expanded > compressed * PLUGIN_LIMITS.ratio)
-			refuse('it is compressed too far to admit')
-	})
-	input.on('error', error => refuse(error.message))
-	if (tar !== input) tar.on('error', (error: Error) => refuse(error.message))
-	tar.pipe(parser)
-	try {
-		await done
-	} catch {
-		input.destroy()
-		tar.destroy()
-		for (const output of outputs) output.destroy()
-	}
-	await Promise.all(writes)
-	if (failure) throw failure
-	return { upstream: destination, entries, executables }
 }
 
 function skillFolder(pins: Pins, skill: string): string {
@@ -444,7 +329,7 @@ try {
 	const kept = (file: string) => !omitted.some(entry => file === entry || file.startsWith(`${entry}/`))
 	const skillPrefixes = pins.skills.map(skill => `${skillFolder(pins, skill)}/`)
 	const named = new Set([...pins.files.map(file => file.from), ...pins.licenseFiles])
-	const { upstream, entries, executables } = await extract(
+	const { upstream, entries, executables } = await extractUpstreamArchive(
 		await upstreamArchive(pins),
 		path.join(scratch, 'upstream'),
 		file => named.has(file) || (skillPrefixes.some(prefix => file.startsWith(prefix)) && kept(file))
@@ -480,7 +365,7 @@ try {
 			const folder = path.join(upstream, ...skillFolder(pins, skill).split('/'))
 			return (existsSync(folder) ? listFiles(folder) : []).map(file => ({
 				from: `${skillFolder(pins, skill)}/${file}`,
-				to: `skills/${skill}/${file}`
+				to: `${pins.skillsDestination}/${skill}/${file}`
 			}))
 		}),
 		...pins.files,
@@ -544,7 +429,11 @@ try {
 					licenseFiles: pins.licenseFiles.map(file => `licenses/${file}`),
 					tree: selected
 				},
-				skills: pins.skills.map(skill => ({ name: skill, from: skillFolder(pins, skill), to: `skills/${skill}` })),
+				skills: pins.skills.map(skill => ({
+					name: skill,
+					from: skillFolder(pins, skill),
+					to: `${pins.skillsDestination}/${skill}`
+				})),
 				excluded: pins.excluded,
 				omitted: pins.omit,
 				files: pins.files
@@ -559,7 +448,12 @@ try {
 		step(`${item.severity} ${item.component}${item.path ? ` (${item.path})` : ''}: ${item.message}`)
 	if (!inspection.ok) fail('the assembled package does not validate')
 	const validated = new Set(inspection.manifest?.skills.map(skill => skill.name))
-	const skipped = pins.skills.filter(skill => !validated.has(skill))
+	const files = new Set(inspection.files.map(file => file.path))
+	const skipped = pins.skills.filter(skill =>
+		pins.skillsDestination === 'skills'
+			? !validated.has(skill)
+			: !files.has(`${pins.skillsDestination}/${skill}/SKILL.md`)
+	)
 	if (skipped.length)
 		fail(`validation skips selected upstream skills ${skipped.join(', ')}; exclude them with a reason`)
 	if (inspection.diagnostics.length)

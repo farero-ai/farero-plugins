@@ -38,7 +38,7 @@ pstack's skills were written for Cursor. This package keeps their text unchanged
 ## Steps to skip
 
 - Skip setup steps, hooks, automatic routing, update checks and telemetry prompts.
-- The scripts in this package are files to read, not programs to run. Skip each step that runs one, such as `scripts/check-plan.mjs`, `scripts/watch-pr/watch-pr`, `scripts/worktree-audit.sh` or `scripts/log.sh`. Do the step by hand when you can. Never run a program or binary that is not there.
+- When a step calls a pstack script such as `scripts/check-plan.mjs` or `scripts/watch-pr/watch-pr`, complete the step with the Farero tools or do it by hand.
 - Cursor's paths and tools are not here: `~/.cursor/`, Cursor rules, Cursor's built-in skills such as `create-skill` and `babysit`, and Cursor modes.
 - For chat history, use `search_chats` and `read_chat`. They replace the `agent-transcripts/` folder that `recall`, `reflect` and `show-me-your-work` read. Read only this workspace's chats unless the person asks for more.
 - For a todo list, use your own plan or task tool.

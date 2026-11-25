@@ -5,8 +5,7 @@ description: Start here for gstack in Farero. Use when the person asks for gstac
 
 # gstack on Farero
 
-This package holds 28 skills from gstack 1.99.0.0 by Garry Tan (MIT), pinned at commit
-`9ab50347ac3728b7bdf03735b4ccceca88b6d958`. The skill text is unchanged. Before the first gstack
+Farero follows gstack’s published releases for the supported skills. Before the first gstack
 skill in a chat, read the package instructions with `plugin_guide` and `plugin: "gstack"`. They
 say how gstack's paths, scripts, questions, helpers and browser steps map to Farero.
 
@@ -33,7 +32,7 @@ skill by adding `file`, for example `skill: "review"` and `file: "checklist.md"`
 | `retro` | Write an engineering retrospective from the git history | The `global` mode is not available |
 | `health` | Run the project's type checker, linter, tests and other tools and show a quality dashboard | |
 | `test-audit` | Find low-value or duplicate tests and the test-only code they keep alive | |
-| `verify` | Run the project's checks and fix the code until they pass | |
+| `build-check` | Run the project's checks and fix the code until they pass | |
 | `modernize` | Bring an old pull request onto its current base and decide MODERNIZE, REWORK or CLOSE | `gh` |
 | `deslop-shared-libs` | Find code in recent work that is worth sharing | |
 | `write-skill` | Write a new agent skill or trim one | |

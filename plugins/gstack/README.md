@@ -1,9 +1,6 @@
 # gstack for Farero
 
-gstack is Garry Tan's set of agent skills for planning, reviewing, testing and shipping
-software. This package puts 28 of its skills into Farero, with roles and two Workflow
-templates. The skill text is gstack 1.99.0.0 at commit
-`9ab50347ac3728b7bdf03735b4ccceca88b6d958`, copied byte for byte.
+Install gstack to use Garry Tan’s planning, review, testing and shipping skills with Farero’s roles and Workflows. Farero follows gstack’s published releases and updates the selected skills in the background. The plugin’s version identifies the Farero integration.
 
 Upstream project: https://github.com/garrytan/gstack (MIT, Copyright (c) 2026 Garry Tan).
 Farero maintains this package, not gstack. It claims no support from the gstack project.
@@ -38,9 +35,6 @@ Farero:
 | `ai.farero/instructions.md` | How gstack's paths, scripts, questions, helpers and browser steps map to Farero. |
 | `roles/*.md` | Instructions for each role. |
 | `skills/gstack-on-farero/` | Entry skill: the skill catalog, roles, templates and limits, and five upstream reference files under `upstream/`. |
-| `skills/<name>/` | The 28 upstream skills, unchanged. |
-| `licenses/` | gstack's license, its third-party notices and the license texts they name. |
-| `THIRD_PARTY_NOTICES.md`, `PROVENANCE.json` | Written by the release recipe: what was copied from where, and what was left out. |
 
 ## Skills
 
@@ -62,7 +56,7 @@ Farero:
 | `retro` | Writes an engineering retrospective from the git history | `global` mode is not available |
 | `health` | Runs the project's own checks and shows a quality dashboard | |
 | `test-audit` | Finds low-value or duplicate tests | |
-| `verify` | Runs the project's checks and fixes the code until they pass | |
+| `build-check` | Runs the project's checks and fixes the code until they pass | |
 | `modernize` | Brings an old pull request onto its current base and decides MODERNIZE, REWORK or CLOSE | `gh` |
 | `deslop-shared-libs` | Finds code in recent work that is worth sharing | |
 | `write-skill` | Writes or trims an agent skill | |
@@ -146,32 +140,9 @@ routing. You start a template yourself and can edit its objective first.
 | `ubicloud` | Needs the Ubicloud command line, an Ubicloud account and gstack's VM programs. |
 | `unfreeze` | Clears the `freeze` hook's state. Farero does not install that hook. |
 
-Inside kept skills, three paths are left out because they are programs: `autoplan/bin/`,
-`plan-ceo-review/bin/` (hook programs) and `design-review/templates/preview-fixtures.mjs`.
-
-The package also leaves out everything in gstack that is not a skill: its programs (`bin/`),
-libraries, tests, build scripts, browser extension, host settings, the skills for other hosts
-(Capy, OpenClaw, QM), the root router skill and the telemetry backend settings in `supabase/`.
-It ships no telemetry endpoint and no Supabase key.
-
-## How the package is built
-
-This folder holds only the files Farero writes. The release recipe adds the upstream files:
-
-```sh
-node --import tsx/esm scripts/plugins/assemble-upstream.ts --plugin gstack --out output/plugins
-```
-
-The pins are in `release/upstream.json`: the repository, the commit, the selected skills, the
-skills left out with their reasons, the paths left out of kept skills, the five reference files
-and the digest of every copied upstream file. The recipe downloads the archive of the pinned
-commit, checks the digest, copies the files unchanged, keeps the license files, writes
-`THIRD_PARTY_NOTICES.md` and `PROVENANCE.json`, and validates the package. Two runs give the
-same archive bytes.
+Farero downloads the supported skill instructions, references and templates. Its app settings show the upstream commit in use.
 
 ## Credits and license
 
-gstack is by Garry Tan and its contributors, MIT licensed. Its license is in
-`licenses/LICENSE`. gstack's own notices (`licenses/NOTICE.md`) credit the Apache-2.0 and MIT
-works that parts of its skills derive from; their license texts are in `licenses/licenses/`.
+gstack is by Garry Tan and its contributors, MIT licensed. Farero caches the upstream license and third-party notices with each downloaded revision.
 The Farero files in this package are MIT licensed.

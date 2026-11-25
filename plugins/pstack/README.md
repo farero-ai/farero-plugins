@@ -1,10 +1,10 @@
 # pstack for Farero
 
-pstack is Lauren Tan's set of agent workflows: poteto-mode and its playbooks, skills to design, review, verify and explain code, and 24 engineering principles. This package holds pstack 0.15.36 from https://github.com/cursor/plugins/tree/main/pstack at commit `c742dd61706fbacc1b95f1a20b7b988cf096ce6c`.
+Install pstack to use Lauren Tan’s skills and playbooks with Farero’s roles and Workflows. Farero follows the pstack directory in Cursor’s plugin repository and updates the selected skills in the background. The plugin’s version identifies the Farero integration.
 
-## What is in the package
+## What you can use
 
-- 53 of the 58 upstream skills, each folder copied byte for byte into `skills/<name>/`.
+- 53 upstream skills with their reference files and playbooks.
 - The two upstream agent texts, `poteto-agent.md` and `comment-sicko.md`, in `skills/pstack-on-farero/agents/`.
 - `skills/pstack-on-farero/`: the entry skill. It lists every skill, the roles, the Workflow templates and the limits.
 - `ai.farero/instructions.md`: the agent instructions that map pstack's Cursor steps to Farero. Farero gives them to the agent with each skill. The upstream text stays unchanged.
@@ -26,15 +26,11 @@ pstack is Lauren Tan's set of agent workflows: poteto-mode and its playbooks, sk
 
 ## Limits
 
-- The scripts in `poteto-mode/scripts/` and `show-me-your-work/scripts/` are files to read. The agent does not run them.
+- If an upstream step uses a pstack script, follow the Farero instructions for that step.
 - Skills from other Cursor plugins, such as `deslop`, `control-ui` and `control-cli` from `cursor-team-kit`, are not in this package.
 - The skills that start helpers work in a top-level chat. A helper chat or a Workflow member cannot start helpers.
 - `poteto-agent` and `second-opinion` never share a model. With Codex and Claude signed in, the poteto subagent runs on a Codex model and the second opinion on a Claude model. With one provider, each role uses a different model of that provider.
 
 ## Credits and license
 
-The pstack skills and agent texts are by Lauren Tan, `Copyright (c) 2026 Lauren Tan`, under the MIT license. The license text is in `licenses/pstack/LICENSE`. `THIRD_PARTY_NOTICES.md` lists the upstream files, and `PROVENANCE.json` records the commit, the digest of the copied files and the reason each skill is left out. The Farero files are MIT licensed.
-
-## How the package is built
-
-`scripts/plugins/assemble-upstream.ts --plugin pstack` in the Farero repository downloads the pinned commit, checks the copied files against the pinned digest, adds the license and the notices, validates the package and packs it. The pins are in `release/upstream.json`, which is not part of the package.
+The pstack skills and agent texts are by Lauren Tan, Copyright (c) 2026 Lauren Tan, under the MIT license. Farero caches the upstream license with each downloaded revision. The Farero files are MIT licensed.

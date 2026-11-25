@@ -42,31 +42,37 @@
 		},
 		{
 			"id": "pstack",
-			"receipt": "pstack-0.15.36-farero.2.release.json",
-			"minAppVersion": "1.221.0",
+			"receipt": "pstack-1.0.0.pack.json",
+			"minAppVersion": "1.268.2",
 			"displayName": "pstack",
 			"description": "Lauren Tan's pstack agent workflows: poteto-mode and its playbooks, skills to design, review, verify and explain code, 24 engineering principles, and roles for its helpers.",
 			"upstream": {
 				"title": "pstack by Lauren Tan",
 				"url": "https://github.com/cursor/plugins/tree/main/pstack"
 			},
-			"checks": [
-				"closure-digest",
-				"pinned-upstream-commit",
-				"upstream-tree-digest",
-				"licenses-retained",
-				"manifest-validation"
-			]
+			"checks": ["closure-digest", "manifest-validation"]
 		},
 		{
 			"id": "gstack",
-			"receipt": "gstack-1.99.0.0-farero.1.release.json",
-			"minAppVersion": "1.179.0",
+			"receipt": "gstack-2.0.0.pack.json",
+			"minAppVersion": "1.268.2",
 			"displayName": "gstack",
 			"description": "Garry Tan's gstack skills for Farero: the CEO, design, engineering and developer-experience plan reviews and the autoplan chain, pre-landing code review, ship, QA and design and documentation workflows, with roles and Workflow templates. Upstream text is unchanged; gstack's programs and browser daemon are left out.",
 			"upstream": {
 				"title": "gstack by Garry Tan",
 				"url": "https://github.com/garrytan/gstack"
+			},
+			"checks": ["closure-digest", "manifest-validation"]
+		},
+		{
+			"id": "ponytail",
+			"receipt": "ponytail-5.3.3-farero.2.release.json",
+			"minAppVersion": "1.267.1",
+			"displayName": "ponytail",
+			"description": "Dietrich Gebert’s Ponytail brings its native hooks, skills and commands to Claude Code, Codex and OpenCode chats.",
+			"upstream": {
+				"title": "ponytail by Dietrich Gebert",
+				"url": "https://github.com/DietrichGebert/ponytail"
 			},
 			"checks": [
 				"closure-digest",

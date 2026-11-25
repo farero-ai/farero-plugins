@@ -1,0 +1,33 @@
+{
+	"$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+	"name": "ponytail",
+	"version": "5.3.3-farero.2",
+	"description": "Ponytail runs its own hooks, skills and commands in Claude Code, Codex and OpenCode chats. Use it to find the smallest change that fully solves the task.",
+	"author": { "name": "Farero", "url": "https://farero.ai" },
+	"homepage": "https://github.com/DietrichGebert/ponytail",
+	"repository": "https://github.com/DietrichGebert/ponytail",
+	"license": "MIT",
+	"keywords": ["ponytail", "yagni", "simplicity", "lazy", "code-review", "audit", "tech-debt"],
+	"extensions": {
+		"ai.farero": {
+			"version": "0.1",
+			"displayName": "ponytail",
+			"native": {
+				"claude": { "root": "./local" },
+				"codex": { "root": "./local", "promptCommands": ["ponytail"] },
+				"opencode": {
+					"root": "./local/.opencode/plugins",
+					"id": "ponytail",
+					"commands": [
+						"ponytail",
+						"ponytail-audit",
+						"ponytail-debt",
+						"ponytail-gain",
+						"ponytail-help",
+						"ponytail-review"
+					]
+				}
+			}
+		}
+	}
+}
