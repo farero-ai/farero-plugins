@@ -1,7 +1,7 @@
 {
 	"$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
 	"name": "gstack",
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"description": "Garry Tan's gstack skills for Farero: the CEO, design, engineering and developer-experience plan reviews and the autoplan chain, pre-landing code review, ship, QA and design and documentation workflows, with roles and Workflow templates. Upstream text is unchanged; gstack's programs and browser daemon are left out.",
 	"author": { "name": "Farero", "url": "https://farero.ai" },
 	"homepage": "https://github.com/garrytan/gstack",
@@ -70,49 +70,49 @@
 					"readOnly": false,
 					"delegation": true,
 					"concurrent": false,
-					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6.1-sol", "effort": "high" }]
+					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6.2-sol", "effort": "high" }]
 				},
 				"ceo-reviewer": {
 					"title": "CEO plan reviewer",
 					"description": "Reviews a plan's premise, scope and ambition with gstack's plan-ceo-review method and returns its findings and decisions.",
 					"instructionsFile": "./roles/ceo-reviewer.md",
 					"readOnly": true,
-					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6.1-sol", "effort": "high" }]
+					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6.2-sol", "effort": "high" }]
 				},
 				"design-reviewer": {
 					"title": "Design plan reviewer",
 					"description": "Reviews the user-interface parts of a plan with gstack's plan-design-review method: hierarchy, states, interaction and visual quality.",
 					"instructionsFile": "./roles/design-reviewer.md",
 					"readOnly": true,
-					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6.1-sol", "effort": "high" }]
+					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6.2-sol", "effort": "high" }]
 				},
 				"dx-reviewer": {
 					"title": "Developer-experience plan reviewer",
 					"description": "Reviews the developer-facing parts of a plan with gstack's plan-devex-review method: first run, APIs, errors, docs and upgrade paths.",
 					"instructionsFile": "./roles/dx-reviewer.md",
 					"readOnly": true,
-					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6.1-sol", "effort": "high" }]
+					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6.2-sol", "effort": "high" }]
 				},
 				"eng-reviewer": {
 					"title": "Engineering plan reviewer",
 					"description": "Reviews a plan's architecture, data flow, edge cases, failure modes and tests with gstack's plan-eng-review method.",
 					"instructionsFile": "./roles/eng-reviewer.md",
 					"readOnly": true,
-					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6-astra", "effort": "high" }]
+					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6.2-astra", "effort": "high" }]
 				},
 				"code-reviewer": {
 					"title": "Code reviewer",
 					"description": "Reviews a diff against its base with gstack's review checklist, one specialist pass or the adversarial pass, and reports findings with the line that causes each.",
 					"instructionsFile": "./roles/code-reviewer.md",
 					"readOnly": true,
-					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6-astra", "effort": "high" }]
+					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6.2-astra", "effort": "high" }]
 				},
 				"outside-voice": {
 					"title": "Outside voice",
 					"description": "Gives the independent second opinion that gstack gets from Codex: challenges a plan or a diff on a different model from the code and engineering reviewers.",
 					"instructionsFile": "./roles/outside-voice.md",
 					"readOnly": true,
-					"models": [{ "model": "gpt-6.1-sol", "effort": "high" }, { "model": "fable", "effort": "high" }],
+					"models": [{ "model": "gpt-6.2-sol", "effort": "high" }, { "model": "fable", "effort": "high" }],
 					"requires": { "independentFrom": ["code-reviewer", "eng-reviewer"] }
 				},
 				"qa": {
@@ -120,7 +120,7 @@
 					"description": "Tests a web app in Farero's browser with gstack's qa-only method and reports each bug with steps, evidence and severity. It changes no code.",
 					"instructionsFile": "./roles/qa.md",
 					"readOnly": true,
-					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6.1-sol", "effort": "high" }],
+					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6.2-sol", "effort": "high" }],
 					"requires": { "browser": true }
 				}
 			},

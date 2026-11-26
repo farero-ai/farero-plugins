@@ -52,14 +52,14 @@ top-level chat can delegate.
 
 | Selector | Access | Default models, in order | Requirement |
 | --- | --- | --- | --- |
-| `gstack/lead` | Can delegate; leads a Workflow template | opus (high), gpt-6.1-sol (high) | None |
-| `gstack/ceo-reviewer` | Read-only | opus (high), gpt-6.1-sol (high) | None |
-| `gstack/design-reviewer` | Read-only | opus (high), gpt-6.1-sol (high) | None |
-| `gstack/dx-reviewer` | Read-only | opus (high), gpt-6.1-sol (high) | None |
-| `gstack/eng-reviewer` | Read-only | opus (high), gpt-6-astra (high) | None |
-| `gstack/code-reviewer` | Read-only | opus (high), gpt-6-astra (high) | None |
-| `gstack/outside-voice` | Read-only | gpt-6.1-sol (high), fable (high) | Different models from the code and engineering reviewers, including fallbacks |
-| `gstack/qa` | Read-only | opus (high), gpt-6.1-sol (high) | Farero's browser tools |
+| `gstack/lead` | Can delegate; leads a Workflow template | opus (high), gpt-6.2-sol (high) | None |
+| `gstack/ceo-reviewer` | Read-only | opus (high), gpt-6.2-sol (high) | None |
+| `gstack/design-reviewer` | Read-only | opus (high), gpt-6.2-sol (high) | None |
+| `gstack/dx-reviewer` | Read-only | opus (high), gpt-6.2-sol (high) | None |
+| `gstack/eng-reviewer` | Read-only | opus (high), gpt-6.2-astra (high) | None |
+| `gstack/code-reviewer` | Read-only | opus (high), gpt-6.2-astra (high) | None |
+| `gstack/outside-voice` | Read-only | gpt-6.2-sol (high), fable (high) | Different models from the code and engineering reviewers, including fallbacks |
+| `gstack/qa` | Read-only | opus (high), gpt-6.2-sol (high) | Farero's browser tools |
 
 The lead role starts helpers, so it runs only as the lead of a Workflow template. Farero uses
 the first available model in each list. The person can choose other models in Settings.

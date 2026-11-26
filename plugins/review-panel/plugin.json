@@ -1,7 +1,7 @@
 {
 	"$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
 	"name": "review-panel",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"description": "A small code review panel: a lead, a correctness reviewer and an independent skeptic, with a managed Workflow template that starts only when you choose it.",
 	"author": { "name": "Farero", "url": "https://farero.ai" },
 	"license": "MIT",
@@ -18,21 +18,21 @@
 					"readOnly": false,
 					"delegation": true,
 					"concurrent": false,
-					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6-astra" }]
+					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6.2-astra" }]
 				},
 				"reviewer": {
 					"title": "Correctness reviewer",
 					"description": "Reads the change and reports concrete defects with a failing input and the line that causes it.",
 					"instructionsFile": "./roles/reviewer.md",
 					"readOnly": true,
-					"models": [{ "model": "gpt-6-astra", "effort": "high" }, { "model": "fable", "effort": "high" }]
+					"models": [{ "model": "gpt-6.2-astra", "effort": "high" }, { "model": "fable", "effort": "high" }]
 				},
 				"skeptic": {
 					"title": "Independent skeptic",
 					"description": "Checks the reviewer's findings and looks for what the reviewer missed, with an independent model.",
 					"instructionsFile": "./roles/skeptic.md",
 					"readOnly": true,
-					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6.1-sol", "effort": "high" }],
+					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6.2-sol", "effort": "high" }],
 					"requires": { "independentFrom": ["reviewer"] }
 				},
 				"ui-check": {
@@ -40,7 +40,7 @@
 					"description": "Opens the changed screens in the host browser and reports visible regressions.",
 					"instructionsFile": "./roles/ui-check.md",
 					"readOnly": true,
-					"models": [{ "model": "opus" }, { "model": "gpt-6.1-sol" }],
+					"models": [{ "model": "opus" }, { "model": "gpt-6.2-sol" }],
 					"requires": { "browser": true }
 				}
 			},

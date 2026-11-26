@@ -1,7 +1,7 @@
 {
 	"$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
 	"name": "pstack",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Lauren Tan's pstack agent workflows for Farero: poteto-mode and its playbooks, skills to design, review, verify and explain code, 24 engineering principles, and roles for its helpers.",
 	"author": { "name": "Farero", "url": "https://farero.ai" },
 	"homepage": "https://github.com/cursor/plugins/tree/main/pstack",
@@ -100,21 +100,21 @@
 					"readOnly": false,
 					"delegation": true,
 					"concurrent": false,
-					"models": [{ "model": "opus", "effort": "xhigh" }, { "model": "gpt-6.1-sol", "effort": "xhigh" }]
+					"models": [{ "model": "opus", "effort": "xhigh" }, { "model": "gpt-6.2-sol", "effort": "xhigh" }]
 				},
 				"poteto-agent": {
 					"title": "Poteto subagent",
 					"description": "Does one code-writing or helper task from a poteto-mode playbook step after it reads poteto-mode in full.",
 					"instructionsFile": "./roles/poteto-agent.md",
 					"readOnly": false,
-					"models": [{ "model": "gpt-6.1-sol", "effort": "high" }, { "model": "fable", "effort": "high" }]
+					"models": [{ "model": "gpt-6.2-sol", "effort": "high" }, { "model": "fable", "effort": "high" }]
 				},
 				"second-opinion": {
 					"title": "Second model family",
 					"description": "Runs the same brief as a poteto subagent on another model family, for adversaries, cross-judges, arena candidates and independent reviews.",
 					"instructionsFile": "./roles/second-opinion.md",
 					"readOnly": false,
-					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6-astra", "effort": "high" }],
+					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6.2-astra", "effort": "high" }],
 					"requires": { "independentFrom": ["poteto-agent"] }
 				},
 				"comment-sicko": {
@@ -122,7 +122,7 @@
 					"description": "Deletes narration and workaround comments in the scoped files or diff and reports the symbols to reshape. It never writes application code.",
 					"instructionsFile": "./roles/comment-sicko.md",
 					"readOnly": false,
-					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6.1-sol", "effort": "high" }]
+					"models": [{ "model": "opus", "effort": "high" }, { "model": "gpt-6.2-sol", "effort": "high" }]
 				}
 			},
 			"workflows": {

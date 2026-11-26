@@ -16,10 +16,10 @@ hand.
 
 | Selector | Access | Default models, in order | Requirement |
 | --- | --- | --- | --- |
-| `review-panel/lead` | Can delegate | opus (high), gpt-6-astra | None |
-| `review-panel/reviewer` | Read-only | gpt-6-astra (high), fable (high) | None |
-| `review-panel/skeptic` | Read-only | opus (high), gpt-6.1-sol (high) | Must use a different model from the reviewer, including fallbacks |
-| `review-panel/ui-check` | Read-only | opus, gpt-6.1-sol | Host browser access |
+| `review-panel/lead` | Can delegate | opus (high), gpt-6.2-astra | None |
+| `review-panel/reviewer` | Read-only | gpt-6.2-astra (high), fable (high) | None |
+| `review-panel/skeptic` | Read-only | opus (high), gpt-6.2-sol (high) | Must use a different model from the reviewer, including fallbacks |
+| `review-panel/ui-check` | Read-only | opus, gpt-6.2-sol | Host browser access |
 
 Farero uses the first available model in each list. You can choose another compatible model
 for a role, or bind one of your own roles instead. Your choice is kept across package updates;
